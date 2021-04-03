@@ -1,0 +1,5 @@
+
+WordCounter.iml
+*.xml
+*.class
+out/production/WordCounter/app.properties
