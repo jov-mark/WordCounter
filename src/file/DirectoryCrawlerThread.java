@@ -1,6 +1,8 @@
-package directory;
+package file;
 
+import job.Job;
 import job.JobQueue;
+import job.JobType;
 
 import java.io.File;
 import java.util.Objects;
@@ -9,11 +11,7 @@ public class DirectoryCrawlerThread extends Thread{
     private String corpus="";
     private String path="";
 
-    private JobQueue jobQueue;
-
-    public DirectoryCrawlerThread(JobQueue jobQueue){
-        this.jobQueue = jobQueue;
-    }
+    private JobQueue jobQueue = JobQueue.getInstance();
 
     @Override
     public void run() {
@@ -37,11 +35,8 @@ public class DirectoryCrawlerThread extends Thread{
     private void crawl(File file){
         if(file.isDirectory()){
             File[] files = file.listFiles();
-            if(file.getName().startsWith(corpus)) {
-                for (File f : Objects.requireNonNull(files)) {
-                    jobQueue.appendJob(f.getPath());
-                }
-            }
+            if(file.getName().startsWith(corpus))
+                jobQueue.appendJob(new Job(JobType.FILE,file.getPath()));
             for(File f: Objects.requireNonNull(files)){
                 crawl(f);
             }

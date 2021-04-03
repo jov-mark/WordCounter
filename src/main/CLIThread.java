@@ -1,6 +1,6 @@
 package main;
 
-import directory.DirectoryCrawlerThread;
+import file.DirectoryCrawlerThread;
 import job.JobQueue;
 
 import java.io.IOException;
@@ -11,13 +11,12 @@ import java.util.Scanner;
 public class CLIThread extends Thread{
     private Map<String, Object> props;
     private DirectoryCrawlerThread dirCrawler;
-    private JobQueue jobQueue;
+    private JobQueue jobQueue = JobQueue.getInstance();
 
     private Scanner scanner;
 
-    public CLIThread(DirectoryCrawlerThread dirCrawler, JobQueue jobQueue){
+    public CLIThread(DirectoryCrawlerThread dirCrawler){
         this.dirCrawler = dirCrawler;
-        this.jobQueue = jobQueue;
     }
 
     @Override
