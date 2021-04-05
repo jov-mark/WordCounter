@@ -2,6 +2,7 @@ package main;
 
 import file.DirectoryCrawlerThread;
 import job.JobQueue;
+import result.ResultRetrieverPool;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,11 +10,9 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class CLIThread extends Thread{
-    private Map<String, Object> props;
     private DirectoryCrawlerThread dirCrawler;
     private JobQueue jobQueue = JobQueue.getInstance();
-
-    private Scanner scanner;
+    private ResultRetrieverPool resultRetriever = ResultRetrieverPool.getInstance();
 
     public CLIThread(DirectoryCrawlerThread dirCrawler){
         this.dirCrawler = dirCrawler;
@@ -22,7 +21,7 @@ public class CLIThread extends Thread{
     @Override
     public void run() {
         if(readConfig()) {
-            scanner = new Scanner(new InputStreamReader(System.in));
+            Scanner scanner = new Scanner(new InputStreamReader(System.in));
             while (true) {
                 String input = scanner.nextLine();
                 if (input.equals("stop")) {
@@ -42,15 +41,17 @@ public class CLIThread extends Thread{
             case "ad":
                 dirCrawler.setPath(cmds[1]); break;
             case "aw":
-                System.out.println("web component"); break;
+                System.out.println("TODO: web component"); break;
             case "get":
-                System.out.println("TODO: get results"); break;
+                if(cmds.length<2 || !resultRetriever.get(cmds[1]))
+                    System.out.println("Invalid arguments!");
+                break;
             case "query":
                 System.out.println("TODO: query results"); break;
             case "cfs":
-                System.out.println("TODO: clear file summary"); break;
+                resultRetriever.clearSummary("file"); break;
             case "cws":
-                System.out.println("TODO: clear web summary"); break;
+                resultRetriever.clearSummary("web"); break;
             default:
                 System.out.println("Invalid input!");
         }
@@ -59,7 +60,7 @@ public class CLIThread extends Thread{
     private boolean readConfig(){
         ConfigReader configReader = new ConfigReader();
         try {
-            props = configReader.getConfig();
+            Map<String, Object> props = configReader.getConfig();
             dirCrawler.setCorpus(props.get("file_corpus_prefix").toString());
         } catch (IOException e) {
             e.printStackTrace();

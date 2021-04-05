@@ -16,7 +16,7 @@ public class JobDispatcherThread extends Thread{
         try{
             while(true){
                 if(jobQueue.isEmpty()) {
-                    System.out.println("Waiting for jobs..");
+//                    System.out.println("Waiting for jobs..");
                     Thread.sleep(5000);
                 }
                 else{

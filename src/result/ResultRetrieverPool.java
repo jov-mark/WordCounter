@@ -1,11 +1,12 @@
 package result;
 
-import java.io.FileWriter;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResultRetrieverPool {
 
     private static ResultRetrieverPool instance = null;
+    private static List<Result> results = new ArrayList<>();
 
     public static ResultRetrieverPool getInstance(){
         if(instance == null){
@@ -14,15 +15,39 @@ public class ResultRetrieverPool {
         return instance;
     }
 
-    public void saveResult(Map<String,Integer> result){
-        try {
-            FileWriter fileWriter = new FileWriter(System.getProperty("user.dir")+"/"+"result.txt");
-            for(Map.Entry entry: result.entrySet()){
-                fileWriter.write(entry.getKey()+": "+entry.getValue().toString());
+    public boolean get(String cmd){
+        String[] args = cmd.split("\\|");
+        if(args.length<2 || !(args[0].equals("file") || args[0].equals("web")))
+            return false;
+
+        if(args[1].equals("summary"))
+            this.summary(args[0]);
+        else
+            this.corpus(args[0], args[1]);
+        return true;
+    }
+
+    public void clearSummary(String type){
+        results.removeIf(r -> r.getType().equals(type));
+    }
+
+    public void saveResult(Result result){
+        results.add(result);
+    }
+
+    private void corpus(String type, String name){
+        for(Result r: results){
+            if(r.getType().equals(type) && r.getName().equals(name)){
+                System.out.println(r.toString());
+                break;
             }
-            fileWriter.close();
-        }catch (Exception e){
-            e.printStackTrace();
+        }
+    }
+
+    private void summary(String type){
+        for(Result r: results){
+            if(r.getType().equals(type))
+                System.out.println(r);
         }
     }
 }

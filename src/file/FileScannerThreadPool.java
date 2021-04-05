@@ -1,5 +1,6 @@
 package file;
 
+import result.Result;
 import result.ResultRetrieverPool;
 
 import java.io.File;
@@ -11,12 +12,17 @@ import java.util.Scanner;
 
 public class FileScannerThreadPool {
     private File file;
+    private Result result;
     private ResultRetrieverPool resultRetriever = ResultRetrieverPool.getInstance();
 
     public void scanDirectory(String path){
-        this.file = new File(path);
-        for(File f: Objects.requireNonNull(this.file.listFiles()))
+        file = new File(path);
+        result = new Result("file", file.getName());
+
+        for(File f: Objects.requireNonNull(file.listFiles()))
             scanFile(f);
+
+        resultRetriever.saveResult(result);
     }
 
     private void scanFile(File f){
@@ -41,11 +47,10 @@ public class FileScannerThreadPool {
     }
 
     private void parseWords(String[] words){
-        Map<String, Integer> result = new HashMap<>();
+        Map<String, Integer> res = result.getCounts();
         for(String w: words){
-            w = w.replaceAll("[?.,]", "");
-            result.put(w, (result.get(w)==null)? 1 : result.get(w)+1);
+            w = w.replaceAll("[^a-zA-Z0-9']", "");
+            res.put(w, (res.get(w)==null)? 1 : res.get(w)+1);
         }
-        resultRetriever.saveResult(result);
     }
 }
