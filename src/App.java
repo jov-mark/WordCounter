@@ -13,11 +13,9 @@ public class App {
         FileScannerThreadPool fileScanner = new FileScannerThreadPool();
 
         JobDispatcherThread jobDispatcherThread = new JobDispatcherThread(fileScanner);
-        DirectoryCrawlerThread crawlerThread = new DirectoryCrawlerThread();
-        CLIThread cli = new CLIThread(crawlerThread);
+        CLIThread cli = new CLIThread(fileScanner);
 
         jobDispatcherThread.start();
-        crawlerThread.start();
         cli.start();
 
 

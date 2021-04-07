@@ -33,6 +33,10 @@ public class Result {
         return counts;
     }
 
+    public void setCounts(Map<String, Integer> counts) {
+        this.counts = counts;
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

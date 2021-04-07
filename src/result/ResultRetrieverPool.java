@@ -6,7 +6,7 @@ import java.util.List;
 public class ResultRetrieverPool {
 
     private static ResultRetrieverPool instance = null;
-    private static List<Result> results = new ArrayList<>();
+    private List<Result> results = new ArrayList<>();
 
     public static ResultRetrieverPool getInstance(){
         if(instance == null){
@@ -32,7 +32,20 @@ public class ResultRetrieverPool {
     }
 
     public void saveResult(Result result){
-        results.add(result);
+        boolean exists = false;
+        for(Result r: results){
+            if(r.getName().equals(result.getName())) {
+                r.setCounts(result.getCounts());
+                exists = true;
+                break;
+            }
+        }
+        if(!exists)
+            results.add(result);
+    }
+
+    public void setResults(List<Result> results){
+        this.results = results;
     }
 
     private void corpus(String type, String name){

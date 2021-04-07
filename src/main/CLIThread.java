@@ -1,21 +1,23 @@
 package main;
 
 import file.DirectoryCrawlerThread;
+import file.FileScannerThreadPool;
 import job.JobQueue;
 import result.ResultRetrieverPool;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Scanner;
 
 public class CLIThread extends Thread{
-    private DirectoryCrawlerThread dirCrawler;
-    private JobQueue jobQueue = JobQueue.getInstance();
     private ResultRetrieverPool resultRetriever = ResultRetrieverPool.getInstance();
+    private FileScannerThreadPool fileScanner;
+    private Map<String, Object> props;
 
-    public CLIThread(DirectoryCrawlerThread dirCrawler){
-        this.dirCrawler = dirCrawler;
+    public CLIThread(FileScannerThreadPool fileScanner){
+        this.fileScanner = fileScanner;
     }
 
     @Override
@@ -39,7 +41,11 @@ public class CLIThread extends Thread{
         String[] cmds = input.split(" ");
         switch (cmds[0]){
             case "ad":
-                dirCrawler.setPath(cmds[1]); break;
+                DirectoryCrawlerThread dirCrawler = new DirectoryCrawlerThread(
+                        cmds[1],
+                        props.get("file_corpus_prefix").toString(),
+                        (Integer)props.get("dir_crawler_sleep_time"));
+                dirCrawler.start(); break;
             case "aw":
                 System.out.println("TODO: web component"); break;
             case "get":
@@ -60,8 +66,9 @@ public class CLIThread extends Thread{
     private boolean readConfig(){
         ConfigReader configReader = new ConfigReader();
         try {
-            Map<String, Object> props = configReader.getConfig();
-            dirCrawler.setCorpus(props.get("file_corpus_prefix").toString());
+            props = configReader.getConfig();
+            fileScanner.setKeywords(props.get("keywords").toString());
+            fileScanner.setSizeLimit((Integer)props.get("file_scanning_size_limit"));
         } catch (IOException e) {
             e.printStackTrace();
             return false;

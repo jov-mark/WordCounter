@@ -1,5 +1,6 @@
 package job;
 
+import file.FileScanner;
 import file.FileScannerThreadPool;
 
 public class JobDispatcherThread extends Thread{
@@ -16,7 +17,6 @@ public class JobDispatcherThread extends Thread{
         try{
             while(true){
                 if(jobQueue.isEmpty()) {
-//                    System.out.println("Waiting for jobs..");
                     Thread.sleep(5000);
                 }
                 else{
@@ -24,6 +24,7 @@ public class JobDispatcherThread extends Thread{
                     if(job.getType()==JobType.FILE){
                         fileScanner.scanDirectory(job.getPath());
                     }
+                    new FileScanner(job.getPath());
                 }
             }
         }catch (Exception e){

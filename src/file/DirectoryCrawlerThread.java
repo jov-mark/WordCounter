@@ -8,25 +8,26 @@ import java.io.File;
 import java.util.Objects;
 
 public class DirectoryCrawlerThread extends Thread{
-    private String corpus="";
-    private String path="";
+    private String corpus;
+    private String path;
+    private int sleepTime;
 
     private JobQueue jobQueue = JobQueue.getInstance();
+
+    public DirectoryCrawlerThread(String path, String corpus, int sleepTime){
+        this.path = path;
+        this.corpus = corpus;
+        this.sleepTime = sleepTime;
+    }
 
     @Override
     public void run() {
         try{
-            while(corpus.equals("")){
-                Thread.sleep(100);
-            }
-            while(path.equals("")){
-                Thread.sleep(4000);
-            }
+            System.out.println(System.currentTimeMillis()+": crawling in "+path);
             File arg = new File(System.getProperty("user.dir")+"/"+path);
             for(File f: Objects.requireNonNull(arg.listFiles()))
                 crawl(f);
-
-            System.out.println("Stopping directory crawler..");
+            Thread.sleep(sleepTime);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -41,14 +42,5 @@ public class DirectoryCrawlerThread extends Thread{
                 crawl(f);
             }
         }
-    }
-
-    public void setPath(String path){
-        if(path.equals("")) return;
-        this.path = path;
-    }
-
-    public void setCorpus(String corpus){
-        this.corpus = corpus;
     }
 }
