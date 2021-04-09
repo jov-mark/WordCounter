@@ -1,33 +1,44 @@
 package file;
 
+import config.Config;
 import job.Job;
-import job.JobQueue;
 import job.JobType;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
 
 public class DirectoryCrawlerThread extends Thread{
     private String corpus;
-    private String path;
     private int sleepTime;
+    private BlockingQueue<Job> jobQueue;
+    private List<String> directories;
 
-    private JobQueue jobQueue = JobQueue.getInstance();
+    public DirectoryCrawlerThread(BlockingQueue<Job> jobQueue){
+        this.directories = new ArrayList<>();
+        this.corpus = Config.getCorpus();
+        this.sleepTime = Config.getSleepTime()*10;
+        this.jobQueue = jobQueue;
+    }
 
-    public DirectoryCrawlerThread(String path, String corpus, int sleepTime){
-        this.path = path;
-        this.corpus = corpus;
-        this.sleepTime = sleepTime;
+    public void addPath(String path){
+        this.directories.add(path);
     }
 
     @Override
     public void run() {
         try{
-            System.out.println(System.currentTimeMillis()+": crawling in "+path);
-            File arg = new File(System.getProperty("user.dir")+"/"+path);
-            for(File f: Objects.requireNonNull(arg.listFiles()))
-                crawl(f);
-            Thread.sleep(sleepTime);
+            while (!Thread.interrupted()){
+                for(String path: directories){
+                    System.out.println(System.currentTimeMillis()+": crawling in "+path);
+                    File dir = new File(System.getProperty("user.dir")+"/"+path);
+                    for(File f: Objects.requireNonNull(dir.listFiles()))
+                        crawl(f);
+                }
+                Thread.sleep(sleepTime);
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -37,7 +48,7 @@ public class DirectoryCrawlerThread extends Thread{
         if(file.isDirectory()){
             File[] files = file.listFiles();
             if(file.getName().startsWith(corpus))
-                jobQueue.appendJob(new Job(JobType.FILE,file.getPath()));
+                jobQueue.add(new Job(JobType.FILE,file.getPath()));
             for(File f: Objects.requireNonNull(files)){
                 crawl(f);
             }

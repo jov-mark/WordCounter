@@ -3,32 +3,38 @@ package job;
 import file.FileScanner;
 import file.FileScannerThreadPool;
 
+import java.util.concurrent.BlockingQueue;
+
 public class JobDispatcherThread extends Thread{
 
-    private JobQueue jobQueue = JobQueue.getInstance();
-    private FileScannerThreadPool fileScanner = new FileScannerThreadPool();
+    private BlockingQueue<Job> jobQueue;
+    private FileScanner fileScanner;
 
-    public JobDispatcherThread(FileScannerThreadPool fileScanner){
+    public JobDispatcherThread(BlockingQueue<Job> jobQueue, FileScanner fileScanner){
         this.fileScanner = fileScanner;
+        this.jobQueue = jobQueue;
     }
 
     @Override
     public void run() {
         try{
-            while(true){
-                if(jobQueue.isEmpty()) {
-                    Thread.sleep(5000);
+            while(!Thread.interrupted()){
+                Job job = null;
+                try {
+                    job = jobQueue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                else{
-                    Job job = jobQueue.getJob();
+                if(job!=null){
                     if(job.getType()==JobType.FILE){
                         fileScanner.scanDirectory(job.getPath());
                     }
-                    new FileScanner(job.getPath());
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
         }
     }
+
+
 }

@@ -1,4 +1,4 @@
-package main;
+package config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,14 +8,13 @@ import java.util.Map;
 import java.util.Properties;
 
 public class ConfigReader {
-    Map<String, Object> props = new HashMap<>();
-    InputStream inputStream;
 
-    public Map<String, Object> getConfig() throws IOException {
+    public static void getConfig() throws IOException {
+        Map<String, Object> props = new HashMap<>();
+        Properties prop = new Properties();
+        String propFileName = "app.properties";
+        InputStream inputStream = ConfigReader.class.getClassLoader().getResourceAsStream(propFileName);
         try{
-            Properties prop = new Properties();
-            String propFileName = "app.properties";
-            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
             if(inputStream != null){
                 prop.load(inputStream);
             }else{
@@ -41,6 +40,6 @@ public class ConfigReader {
         }finally {
             inputStream.close();
         }
-        return props;
+        Config.setConfig(props);
     }
 }

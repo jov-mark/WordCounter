@@ -1,5 +1,7 @@
 package file;
 
+import config.Config;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
@@ -10,15 +12,14 @@ import java.util.stream.Stream;
 public class FileScanTask extends RecursiveTask<Map<String,Integer>> {
     private File directory;
     private List<File> files;
-    private final int file_scanning_size_limit = 10;
-    private List<String> keywords = new ArrayList<>();
+    private int file_scanning_size_limit;
+    private List<String> keywords;
 
     public FileScanTask(File directory, List<File> files){
         this.directory = directory;
         this.files = files;
-        keywords.add("one");
-        keywords.add("two");
-        keywords.add("three");
+        this.keywords = Config.getKeywords();
+        this.file_scanning_size_limit = Config.getFileSizeLimit();
     }
 
     @Override
@@ -59,7 +60,6 @@ public class FileScanTask extends RecursiveTask<Map<String,Integer>> {
         Map<String, Integer> res = new HashMap<>();
         if(f.length()!=0){
             try {
-                StringBuilder lines = new StringBuilder();
                 Scanner sc = new Scanner(new FileInputStream(f.getPath()));
                 while(sc.hasNext()){
                     String[] words = sc.nextLine().split(" ");

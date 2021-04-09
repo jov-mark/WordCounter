@@ -11,12 +11,15 @@ import java.util.concurrent.Future;
 
 public class FileScanner {
     private ResultRetrieverPool retrieverPool = ResultRetrieverPool.getInstance();
+    private ForkJoinPool forkJoinPool;
 
-    public FileScanner(String dirPath){
+    public FileScanner(){
+        forkJoinPool = new ForkJoinPool();
+    }
+
+    public void scanDirectory(String dirPath){
         File file = new File(dirPath);
         File[] files = file.listFiles();
-
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
 
         Future<Map<String,Integer>> result = forkJoinPool.submit(new FileScanTask(file, Arrays.asList(files)));
         try {
@@ -28,5 +31,6 @@ public class FileScanner {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
     }
 }
