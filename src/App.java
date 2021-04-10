@@ -4,6 +4,8 @@ import file.DirectoryCrawlerThread;
 import file.FileScanner;
 import job.Job;
 import job.JobDispatcherThread;
+import job.JobType;
+import result.ResultRetriever;
 import result.ResultRetrieverPool;
 
 import java.io.IOException;
@@ -23,14 +25,13 @@ public class App {
 
         BlockingQueue<Job> jobQueue = new ArrayBlockingQueue<>(20);
 
-        FileScanner fileScanner = new FileScanner();
+        ResultRetriever resultRetriever = new ResultRetriever();
+        FileScanner fileScanner = new FileScanner(resultRetriever);
         JobDispatcherThread jobDispatcherThread = new JobDispatcherThread(jobQueue, fileScanner);
         jobDispatcherThread.start();
 
         DirectoryCrawlerThread directoryCrawlerThread = new DirectoryCrawlerThread(jobQueue);
         directoryCrawlerThread.start();
-
-        ResultRetrieverPool resultRetriever = ResultRetrieverPool.getInstance();
 
         boolean work = true;
         Scanner scanner = new Scanner(new InputStreamReader(System.in));
@@ -38,21 +39,31 @@ public class App {
             String[] cmds = scanner.nextLine().split(" ");
             switch (cmds[0]){
                 case "ad":
+//                    TODO: handle wrong input or non dir argument
                     directoryCrawlerThread.addPath(cmds[1]); break;
+
                 case "aw":
                     System.out.println("TODO: web component");  break;
+
                 case "get":
-                    if(cmds.length<2 || !resultRetriever.get(cmds[1]))
+                    boolean invalid = cmds.length<2;
+                    if(!invalid && !cmds[1].startsWith("web")){
+                        invalid = !resultRetriever.get(cmds[1]);
+                    }
+                    if(invalid)
                         System.out.println("Invalid arguments!");
                     break;
+
                 case "query":
                     System.out.println("TODO: query results");  break;
                 case "cfs":
-                    resultRetriever.clearSummary("file");   break;
+                    resultRetriever.clearSummary(JobType.FILE);   break;
                 case "cws":
-                    resultRetriever.clearSummary("web");    break;
+                    resultRetriever.clearSummary(JobType.WEB);  break;
                 case "stop":
                     scanner.close();
+                    fileScanner.shutdown();
+                    resultRetriever.shutdown();
                     work=false; break;
                 default:
                     System.out.println("Invalid input!");

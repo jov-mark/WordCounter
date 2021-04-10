@@ -1,20 +1,20 @@
 package file;
 
-import result.ResultRetrieverPool;
+import result.ResultRetriever;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 public class FileScanner {
-    private ResultRetrieverPool retrieverPool = ResultRetrieverPool.getInstance();
+    private ResultRetriever resultRetriever;
     private ForkJoinPool forkJoinPool;
 
-    public FileScanner(){
+    public FileScanner(ResultRetriever resultRetriever){
         forkJoinPool = new ForkJoinPool();
+        this.resultRetriever = resultRetriever;
     }
 
     public void scanDirectory(String dirPath){
@@ -22,15 +22,10 @@ public class FileScanner {
         File[] files = file.listFiles();
 
         Future<Map<String,Integer>> result = forkJoinPool.submit(new FileScanTask(file, Arrays.asList(files)));
-        try {
-            Map<String,Integer> res = result.get();
-            System.out.println(file.getName()+":");
-            for(Map.Entry e: res.entrySet()){
-                System.out.println(e.getKey()+":"+e.getValue());
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        resultRetriever.setFileResults(file.getName(),result);
+    }
 
+    public void shutdown(){
+        forkJoinPool.shutdown();
     }
 }

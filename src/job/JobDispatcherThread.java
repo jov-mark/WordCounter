@@ -1,8 +1,6 @@
 package job;
 
 import file.FileScanner;
-import file.FileScannerThreadPool;
-
 import java.util.concurrent.BlockingQueue;
 
 public class JobDispatcherThread extends Thread{
@@ -11,8 +9,8 @@ public class JobDispatcherThread extends Thread{
     private FileScanner fileScanner;
 
     public JobDispatcherThread(BlockingQueue<Job> jobQueue, FileScanner fileScanner){
-        this.fileScanner = fileScanner;
         this.jobQueue = jobQueue;
+        this.fileScanner = fileScanner;
     }
 
     @Override

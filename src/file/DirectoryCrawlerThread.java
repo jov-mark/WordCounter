@@ -5,9 +5,7 @@ import job.Job;
 import job.JobType;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
 public class DirectoryCrawlerThread extends Thread{
@@ -15,12 +13,14 @@ public class DirectoryCrawlerThread extends Thread{
     private int sleepTime;
     private BlockingQueue<Job> jobQueue;
     private List<String> directories;
+    private Map<String,Long> lastModified;
 
     public DirectoryCrawlerThread(BlockingQueue<Job> jobQueue){
         this.directories = new ArrayList<>();
         this.corpus = Config.getCorpus();
-        this.sleepTime = Config.getSleepTime()*10;
+        this.sleepTime = Config.getSleepTime()*5;
         this.jobQueue = jobQueue;
+        this.lastModified = new HashMap<>();
     }
 
     public void addPath(String path){
@@ -32,7 +32,6 @@ public class DirectoryCrawlerThread extends Thread{
         try{
             while (!Thread.interrupted()){
                 for(String path: directories){
-                    System.out.println(System.currentTimeMillis()+": crawling in "+path);
                     File dir = new File(System.getProperty("user.dir")+"/"+path);
                     for(File f: Objects.requireNonNull(dir.listFiles()))
                         crawl(f);
@@ -47,8 +46,14 @@ public class DirectoryCrawlerThread extends Thread{
     private void crawl(File file){
         if(file.isDirectory()){
             File[] files = file.listFiles();
-            if(file.getName().startsWith(corpus))
-                jobQueue.add(new Job(JobType.FILE,file.getPath()));
+            if(file.getName().startsWith(corpus)){
+                long current = file.lastModified();
+                String path = file.getPath();
+                if(lastModified.get(path)==null || lastModified.get(path)!=current){
+                    lastModified.put(path,current);
+                    jobQueue.add(new Job(JobType.FILE,path));
+                }
+            }
             for(File f: Objects.requireNonNull(files)){
                 crawl(f);
             }
