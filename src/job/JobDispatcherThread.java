@@ -16,7 +16,7 @@ public class JobDispatcherThread extends Thread{
     @Override
     public void run() {
         try{
-            while(!Thread.interrupted()){
+            while(true){
                 Job job = null;
                 try {
                     job = jobQueue.take();
@@ -24,11 +24,15 @@ public class JobDispatcherThread extends Thread{
                     e.printStackTrace();
                 }
                 if(job!=null){
+                    if(job.isPoison()){
+                        break;
+                    }
                     if(job.getType()==JobType.FILE){
                         fileScanner.scanDirectory(job.getPath());
                     }
                 }
             }
+            System.out.println("Stopping job dispatcher..");
         }catch (Exception e){
             e.printStackTrace();
         }

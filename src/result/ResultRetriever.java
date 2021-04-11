@@ -79,39 +79,7 @@ public class ResultRetriever {
             webResults.clear();
     }
 
-//
-//    public void saveResult(Result result){
-//        boolean exists = false;
-//        for(Result r: results){
-//            if(r.getName().equals(result.getName())) {
-//                r.setCounts(result.getCounts());
-//                exists = true;
-//                break;
-//            }
-//        }
-//        if(!exists)
-//            results.add(result);
-//    }
-//
-//    public void setResults(List<Result> results){
-//        this.results = results;
-//    }
-//
-//    private void corpus(String type, String name){
-//        for(Result r: results){
-//            if(r.getType().equals(type) && r.getName().equals(name)){
-//                System.out.println(r.toString());
-//                break;
-//            }
-//        }
-//    }
-//
-//    private void summary(String type){
-//        for(Result r: results){
-//            if(r.getType().equals(type))
-//                System.out.println(r);
-//        }
-//    }
+
 
 //    TODO: add corpus results
     public void addCorpusResults(String corpusName, Future<Map<String,Integer>> corpusResult){

@@ -62,6 +62,8 @@ public class App {
                     resultRetriever.clearSummary(JobType.WEB);  break;
                 case "stop":
                     scanner.close();
+                    directoryCrawlerThread.stopThread();
+                    jobQueue.add(new Job(null,"",true));
                     fileScanner.shutdown();
                     resultRetriever.shutdown();
                     work=false; break;

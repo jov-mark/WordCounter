@@ -9,18 +9,17 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
 public class DirectoryCrawlerThread extends Thread{
-    private String corpus;
-    private int sleepTime;
     private BlockingQueue<Job> jobQueue;
     private List<String> directories;
     private Map<String,Long> lastModified;
 
-    public DirectoryCrawlerThread(BlockingQueue<Job> jobQueue){
-        this.directories = new ArrayList<>();
-        this.corpus = Config.getCorpus();
-        this.sleepTime = Config.getSleepTime()*5;
-        this.jobQueue = jobQueue;
-        this.lastModified = new HashMap<>();
+    private boolean working;
+
+    public DirectoryCrawlerThread(BlockingQueue<Job> queue){
+        working = true;
+        jobQueue = queue;
+        directories = new ArrayList<>();
+        lastModified = new HashMap<>();
     }
 
     public void addPath(String path){
@@ -30,14 +29,15 @@ public class DirectoryCrawlerThread extends Thread{
     @Override
     public void run() {
         try{
-            while (!Thread.interrupted()){
+            while (working){
                 for(String path: directories){
                     File dir = new File(System.getProperty("user.dir")+"/"+path);
                     for(File f: Objects.requireNonNull(dir.listFiles()))
                         crawl(f);
                 }
-                Thread.sleep(sleepTime);
+                Thread.sleep(Config.getSleepTime());
             }
+            System.out.println("Stopping directory crawler..");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -46,17 +46,21 @@ public class DirectoryCrawlerThread extends Thread{
     private void crawl(File file){
         if(file.isDirectory()){
             File[] files = file.listFiles();
-            if(file.getName().startsWith(corpus)){
+            if(file.getName().startsWith(Config.getCorpus())){
                 long current = file.lastModified();
                 String path = file.getPath();
                 if(lastModified.get(path)==null || lastModified.get(path)!=current){
                     lastModified.put(path,current);
-                    jobQueue.add(new Job(JobType.FILE,path));
+                    jobQueue.add(new Job(JobType.FILE,path,false));
                 }
             }
             for(File f: Objects.requireNonNull(files)){
                 crawl(f);
             }
         }
+    }
+
+    public void stopThread() {
+        this.working = false;
     }
 }
