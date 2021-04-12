@@ -1,5 +1,7 @@
 package result;
 
+import config.Config;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +21,12 @@ public class Result {
         this.type = type;
         this.name = name;
         this.counts = counts;
+    }
+
+    public Result(String name, Map<String,Integer> res){
+        this.type = "file";
+        this.name = name;
+        this.counts = res;
     }
 
     public String getType() {
@@ -41,10 +49,13 @@ public class Result {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(name).append("\n").append("{");
-        for(Map.Entry w: counts.entrySet())
-            str.append(w.getKey()).append("=").append(w.getValue()).append(", ");
-        str.delete(str.length()-2,str.length());
-        str.append("}");
+
+        for(String keyword: Config.getKeywords()){
+            str.append(keyword).append("=");
+            str.append(counts.getOrDefault(keyword,0).toString());
+            str.append(",");
+        }
+        str.setCharAt(str.length()-1,'}');
         return str.toString();
     }
 }

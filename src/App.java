@@ -6,7 +6,6 @@ import job.Job;
 import job.JobDispatcherThread;
 import job.JobType;
 import result.ResultRetriever;
-import result.ResultRetrieverPool;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

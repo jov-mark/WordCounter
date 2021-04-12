@@ -12,14 +12,11 @@ import java.util.stream.Stream;
 public class FileScanTask extends RecursiveTask<Map<String,Integer>> {
     private File directory;
     private List<File> files;
-    private int file_scanning_size_limit;
-    private List<String> keywords;
+    private List<String> keywords = Config.getKeywords();
 
     public FileScanTask(File directory, List<File> files){
         this.directory = directory;
         this.files = files;
-        this.keywords = Config.getKeywords();
-        this.file_scanning_size_limit = Config.getFileSizeLimit();
     }
 
     @Override
@@ -28,13 +25,13 @@ public class FileScanTask extends RecursiveTask<Map<String,Integer>> {
         int index = 0;
         int sumSize = 0;
         for(; index<files.size(); index++){
-            if(sumSize < file_scanning_size_limit)
+            if(sumSize < Config.getFileSizeLimit())
                 sumSize += files.get(index).length();
             else
                 break;
         }
         for(int i=0; i<index; i++)
-            result.putAll(scanFile(files.get(i)));
+            merge(result,scanFile(files.get(i)));
 
         if(index<files.size()){
             int mid = ((files.size() - index) / 2) + index;
@@ -44,6 +41,7 @@ public class FileScanTask extends RecursiveTask<Map<String,Integer>> {
             left.fork();
             Map<String,Integer> rightResult = right.compute();
             Map<String,Integer> leftResult = left.join();
+
             merge(result,leftResult);
             merge(result,rightResult);
         }
@@ -65,7 +63,7 @@ public class FileScanTask extends RecursiveTask<Map<String,Integer>> {
                     String[] words = sc.nextLine().split(" ");
                     for(String w: words){
                         if(keywords.contains(w)){
-                            res.put(w, (res.get(w)==null)?1:res.get(w)+1);
+                            res.put(w,res.getOrDefault(w,0)+1);
                         }
                     }
                 }

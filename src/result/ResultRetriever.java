@@ -40,12 +40,8 @@ public class ResultRetriever {
             for(String file: fileResults.keySet()){
                 try {
                     Map<String,Integer> res = fileResults.get(file).get();
-                    System.out.println(file+":");
-                    System.out.print("{");
-                    for(Map.Entry e: res.entrySet()){
-                        System.out.print(e.getKey()+":"+e.getValue()+",");
-                    }
-                    System.out.println("}");
+                    Result result = new Result(file,res);
+                    System.out.println(result);
 
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
@@ -58,11 +54,8 @@ public class ResultRetriever {
 
             try {
                 Map<String,Integer> res = fileResults.get(args[1]).get();
-                System.out.print("{");
-                for(Map.Entry e: res.entrySet()){
-                    System.out.print(e.getKey()+":"+e.getValue()+",");
-                }
-                System.out.println("}");
+                Result result = new Result(args[1],res);
+                System.out.println(result);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
