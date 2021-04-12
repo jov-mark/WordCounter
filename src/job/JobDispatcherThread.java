@@ -29,7 +29,7 @@ public class JobDispatcherThread extends Thread{
                     }
                     if(job.getType()==JobType.FILE){
                         fileScanner.scanDirectory(job.getPath());
-                        Thread.sleep(4000);
+                        Thread.sleep(3000);
                     }
                 }
             }

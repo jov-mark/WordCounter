@@ -31,7 +31,7 @@ public class DirectoryCrawlerThread extends Thread{
         try{
             while (working){
                 for(String path: directories){
-                    File dir = new File(System.getProperty("user.dir")+"/"+path);
+                    File dir = new File(path);
                     for(File f: Objects.requireNonNull(dir.listFiles()))
                         crawl(f);
                 }

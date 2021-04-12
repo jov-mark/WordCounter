@@ -2,19 +2,19 @@ package result;
 
 import job.JobType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 public class ResultRetriever {
-    private ForkJoinPool forkJoinPool;
     private Map<String, Future<Map<String,Integer>>> webResults;
     private Map<String, Future<Map<String,Integer>>> fileResults;
 
     public ResultRetriever(){
-        forkJoinPool = new ForkJoinPool();
         webResults = new HashMap<>();
         fileResults = new HashMap<>();
     }
@@ -23,46 +23,30 @@ public class ResultRetriever {
         fileResults.put(path,result);
     }
 
-    private void getPool(){
-
-    }
-
-    private void summaryPool(){
-
-    }
-
-    public boolean get(String cmd){
-        String[] args = cmd.split("\\|");
-        if(args.length<2 || !(args[0].equals("file") || args[0].equals("web")))
-            return false;
-
-        if(args[0].equals("file") && args[1].equals("summary")){
-            for(String file: fileResults.keySet()){
-                try {
-                    Map<String,Integer> res = fileResults.get(file).get();
-                    Result result = new Result(file,res);
-                    System.out.println(result);
-
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }else if(args[0].equals("file")){
-            if(fileResults.get(args[1]) == null)
-                return false;
-
+    public Result get(String arg){
+        Result r = null;
+        if(fileResults.get(arg) != null){
             try {
-                Map<String,Integer> res = fileResults.get(args[1]).get();
-                Result result = new Result(args[1],res);
-                System.out.println(result);
+                Map<String,Integer> res = fileResults.get(arg).get();
+                r = new Result(arg,res);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-        }else{
-            return false;
         }
-        return true;
+        return r;
+    }
+
+    public List<Result> getSummary(){
+        List<Result> result = new ArrayList<>();
+        for(String file: fileResults.keySet()){
+            try {
+                Map<String,Integer> res = fileResults.get(file).get();
+                result.add(new Result(file,res));
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 
     public void clearSummary(JobType type){
@@ -72,14 +56,8 @@ public class ResultRetriever {
             webResults.clear();
     }
 
-
-
-//    TODO: add corpus results
+//    TODO: add corpus results when corpus added/updated
     public void addCorpusResults(String corpusName, Future<Map<String,Integer>> corpusResult){
 
-    }
-
-    public void shutdown(){
-        forkJoinPool.shutdown();
     }
 }

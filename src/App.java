@@ -5,10 +5,13 @@ import file.FileScanner;
 import job.Job;
 import job.JobDispatcherThread;
 import job.JobType;
+import result.Result;
 import result.ResultRetriever;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -33,39 +36,81 @@ public class App {
         directoryCrawlerThread.start();
 
         boolean work = true;
+        boolean invalid = false;
         Scanner scanner = new Scanner(new InputStreamReader(System.in));
         while (work) {
             String[] cmds = scanner.nextLine().split(" ");
             switch (cmds[0]){
                 case "ad":
-//                    TODO: handle wrong input or non dir argument
-                    directoryCrawlerThread.addPath(cmds[1]); break;
+                    if(cmds.length<2)
+                        System.out.println("Invalid input!");
+                    else {
+                        String path = System.getProperty("user.dir") + "\\" + cmds[1];
+                        if (!Files.exists(Paths.get(path)))
+                            System.out.println("No directory for given path");
+                        else
+                            directoryCrawlerThread.addPath(path);
+                    }
+                    break;
 
                 case "aw":
                     System.out.println("TODO: web component");  break;
 
                 case "get":
-                    boolean invalid = cmds.length<2;
-                    if(!invalid && !cmds[1].startsWith("web")){
-                        invalid = !resultRetriever.get(cmds[1]);
+                    if(cmds.length<2) {
+                        System.out.println("Invalid input!");
+                        break;
                     }
-                    if(invalid)
+                    String[] arg = cmds[1].split("\\|");
+                    if(arg.length<2 || !(arg[0].equals("file") || arg[0].equals("web"))) {
                         System.out.println("Invalid arguments!");
+                        break;
+                    }
+                    if(!cmds[1].startsWith("web")) {
+                        if(arg[1].equals("summary")){
+                            List<Result> result = resultRetriever.getSummary();
+                            if(!result.isEmpty()){
+                                for(Result r: result)
+                                    System.out.println(r);
+                            }
+                        }else{
+                            Result r = resultRetriever.get(args[1]);
+                            if(r==null)
+                                System.out.println("No corpus with that name!");
+                            else
+                                System.out.println(r);
+                        }
+                    }
                     break;
 
                 case "query":
                     System.out.println("TODO: query results");  break;
+
                 case "cfs":
-                    resultRetriever.clearSummary(JobType.FILE);   break;
+                    if(cmds.length>1)
+                        System.out.println("Invalid input!");
+                    else
+                        resultRetriever.clearSummary(JobType.FILE);
+                    break;
+
                 case "cws":
-                    resultRetriever.clearSummary(JobType.WEB);  break;
+                    if(cmds.length>1)
+                        System.out.println("Invalid input!");
+                    else
+                        resultRetriever.clearSummary(JobType.WEB);
+                    break;
+
                 case "stop":
-                    scanner.close();
-                    directoryCrawlerThread.stopThread();
-                    jobQueue.add(new Job(null,"",true));
-                    fileScanner.shutdown();
-                    resultRetriever.shutdown();
-                    work=false; break;
+                    if(cmds.length>1)
+                        System.out.println("Invalid input!");
+                    else {
+                        scanner.close();
+                        directoryCrawlerThread.stopThread();
+                        jobQueue.add(new Job(null, "", true));
+                        fileScanner.shutdown();
+                        work = false;
+                    }
+                    break;
                 default:
                     System.out.println("Invalid input!");
             }
